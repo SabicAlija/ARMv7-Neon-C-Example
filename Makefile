@@ -26,7 +26,7 @@ DB_ASM_FLAGS	= -batch -ex
 ARMCC			= armcc
 ELF				= fromelf
 
-ACC_FLAGS		= --cpu=Cortex-A7 -O3 -Otime --vectorize --restrict
+ACC_FLAGS		= --cpu=Cortex-A7 -O3 -Otime --vectorize --restrict -W
 
 
 
@@ -38,104 +38,152 @@ LD_FLAGS		=
 
 all:
 
+
+
+# Vectorization accumulate()
+
 accu:
+	@echo "\nVectorization: accumulate()"
+	@echo "\nCompilation without/with processor details\n"
+	@echo "GCC\n"
 	$(CC) $(CC_NOPT) $(CC_L0_FLAGS) -o $(T1-1) $(T1).c
 	$(CC) $(CC_NOPT) $(CC_L1_FLAGS) -o $(T1-2) $(T1).c
+	@echo "\n"
 	
 accu-opt:
+	@echo "\nCompilation without/with processor details\n"
+	@echo "GCC\n"
 	$(CC) $(CC_OPT) $(CC_L0_FLAGS) -o $(T1-1) $(T1).c
 	$(CC) $(CC_OPT) $(CC_L1_FLAGS) -o $(T1-2) $(T1).c
+	@echo "\n"
 
 casm-accu: accu
+	@echo "GDB\n"
 	$(DB) $(T1-1) $(DB_ASM_FLAGS) 'disas accumulate' > 1
 	$(DB) $(T1-2) $(DB_ASM_FLAGS) 'disas accumulate' > 2
 	
-	wc -l 1
-	wc -l 2
+	@echo "\n\nCount and compare generated assemblies\n"
+	wc -l 1 2
+	@echo "\n"
 
 casm-accu-opt: accu-opt
+	@echo "GDB\n"
 	$(DB) $(T1-1) $(DB_ASM_FLAGS) 'disas accumulate' > 1
 	$(DB) $(T1-2) $(DB_ASM_FLAGS) 'disas accumulate' > 2
 
-	wc -l 1
-	wc -l 2
+	@echo "\n\nCount and compare generated assemblies\n"
+	wc -l 1 2
+	@echo "\n"
 
 
+
+
+
+
+
+
+# Vectorization accumulate2()
 
 
 
 accu2:
+	@echo "\nVectorization: accumulate()"
+	@echo "\nCompilation without/with processor details\n"
+	@echo "GCC\n"
 	$(CC) $(CC_NOPT) $(CC_L0_FLAGS) -o $(T1-1) $(T1).c
 	$(CC) $(CC_NOPT) $(CC_L1_FLAGS) -o $(T1-2) $(T1).c
+	@echo "\n"
 	
 accu2-opt:
+	@echo "\nVectorization: accumulate()"
+	@echo "\nCompilation without/with processor details\n"
+	@echo "GCC\n"
 	$(CC) $(CC_OPT) $(CC_L0_FLAGS) -o $(T1-1) $(T1).c
 	$(CC) $(CC_OPT) $(CC_L1_FLAGS) -o $(T1-2) $(T1).c
+	@echo "\n"
 
 casm-accu2: accu2
 	$(DB) $(T1-1) $(DB_ASM_FLAGS) 'disas accumulate2' > 1
 	$(DB) $(T1-2) $(DB_ASM_FLAGS) 'disas accumulate2' > 2
 	
-	wc -l 1
-	wc -l 2
+	wc -l 1 2
 
 casm-accu2-opt: accu2-opt
 	$(DB) $(T1-1) $(DB_ASM_FLAGS) 'disas accumulate2' > 1
 	$(DB) $(T1-2) $(DB_ASM_FLAGS) 'disas accumulate2' > 2
 
-	wc -l 1
-	wc -l 2
+	wc -l 1 2
 
 
 
 
 
 
-
+# Vectorization vector_add_of_n()
 
 
 vadd:
+	@echo "\nCompilation without/with processor details\n"
+	@echo "GCC"
 	$(CC) $(CC_NOPT) $(CC_L0_FLAGS) -o $(T1-1) $(T1).c
 	$(CC) $(CC_NOPT) $(CC_L1_FLAGS) -o $(T1-2) $(T1).c
+	@echo "\n"
 	
 vadd-opt:
+	@echo "\nCompilation without/with processor details\n"
+	@echo "GCC"
 	$(CC) $(CC_OPT) $(CC_L0_FLAGS) -o $(T1-1) $(T1).c
 	$(CC) $(CC_OPT) $(CC_L1_FLAGS) -o $(T1-2) $(T1).c
+	@echo "\n"
 
 casm-vadd: vadd
 	$(DB) $(T1-1) $(DB_ASM_FLAGS) 'disas vector_add_of_n' > 1
 	$(DB) $(T1-2) $(DB_ASM_FLAGS) 'disas vector_add_of_n' > 2
 	
-	wc -l 1
-	wc -l 2
+	wc -l 1 2
 
 casm-vadd-opt: vadd-opt
 	$(DB) $(T1-1) $(DB_ASM_FLAGS) 'disas vector_add_of_n' > 1
 	$(DB) $(T1-2) $(DB_ASM_FLAGS) 'disas vector_add_of_n' > 2
 
-	wc -l 1
-	wc -l 2
+	wc -l 1 2
 	
+	
+	
+# Vectorization ARMCC
+# 
+# accumulate()
+# accumulate2()
+# vector_add_of_n()
+
 arm-vec:
+	@echo "\nVectorization using ARMCC\n\n"
+	@echo "\nARMCC\n"
 	$(ARMCC) $(ACC_FLAGS) $(T1).c
-	$(ELF) -c $(T1).o
+	@echo "\n\n"
+	@echo "\nFROMELF\n"
 	$(ELF) -c $(T1).o > 3
+	@echo "\n\n"
+
+
+
 	
-	
-	
+# Intrinsics double_elements()
 	
 	
 idbl:
+	@echo "\nCompilation without/with processor details\n"
+	@echo "GCC"
 	$(CC) $(CC_OPT) $(CC_L0_FLAGS) -o $(T2-1) $(T2).c
 	$(CC) $(CC_OPT) $(CC_L1_FLAGS) -o $(T2-2) $(T2).c
+	@echo "\n"
 	
 
 casm-idbl: idbl
 	$(DB) $(T2-1) $(DB_ASM_FLAGS) 'disas double_elements' > 1
 	$(DB) $(T2-2) $(DB_ASM_FLAGS) 'disas double_elements' > 2
 	
-	wc -l 1
-	wc -l 2
+	wc -l 1 2
 
 
 
@@ -148,9 +196,11 @@ arm-intr:
 
 	
 	
-	
+# Intrinsics data handling
 	
 imem:
+	@echo "\nCompilation without/with processor details\n"
+	@echo "GCC"
 	$(CC) $(CC_OPT) $(CC_L0_FLAGS) -o $(T3-1) $(T3).c
 	$(CC) $(CC_OPT) $(CC_L1_FLAGS) -o $(T3-2) $(T3).c
 
@@ -158,8 +208,7 @@ casm-imem: imem
 	$(DB) $(T3-1) $(DB_ASM_FLAGS) 'disas main' > 1
 	$(DB) $(T3-2) $(DB_ASM_FLAGS) 'disas main' > 2
 	
-	wc -l 1
-	wc -l 2
+	wc -l 1 2
 
 casm-imem-db:
 	$(CC) $(CC_DB) $(CC_L1_FLAGS) -o $(T3) $(T3).c

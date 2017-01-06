@@ -2,7 +2,7 @@
  * @file	HelloNeon-Vectorization.c
  * @author	Alija Sabic, es16m016, MES1B
  * @date	January 2017
- * @brief	TODO
+ * @brief	Small compiler vectorization example.
  */
 
 
